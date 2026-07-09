@@ -95,7 +95,8 @@
             appId: "YOUR_APP_ID"
         };
         
-        const GEMINI_API_KEY ="AQ.Ab8RN6KDxrfXDRSN6JKPUktDRyIfyQ0dopL6TNESXg2mvn-hCw"; 
+        // 보주신 진짜 키를 정상적으로 심어놓았습니다.
+        const GEMINI_API_KEY = "AQ.Ab8RN6KDxrfXDRSN6JKPUktDRyIfyQ0dopL6TNESXg2mvn-hCw"; 
 
         let todos = [];
         let isFirebaseConnected = false;
@@ -217,7 +218,7 @@
         });
 
         // ==========================================
-        // 전체 일정을 취합하여 AI에게 쏘는 주입부
+        // 전체 일정을 취합하여 AI에게 쏘는 주입부 (최신 gemini-2.5-flash 주소 반영)
         // ==========================================
         btnAiRecommend.addEventListener('click', async () => {
             if (todos.length === 0) {
@@ -233,17 +234,16 @@
             aiLoading.classList.remove('hidden');
             aiResult.classList.add('hidden');
 
-            // 1. 현재 등록된 모든 일정을 텍스트로 가공
             const taskListString = todos.map(t => {
                 const dDayInfo = calculateDDay(t.date);
                 return `- 과제명: ${t.title}, 마감일: ${t.date} (${dDayInfo.text})`;
             }).join('\n');
 
-            // 오늘의 날짜 정보 획득
             const todayStr = new Date().toISOString().split('T')[0];
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                // 주소를 최신 안정 버전인 gemini-2.5-flash로 업데이트했습니다.
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -277,7 +277,7 @@ ${taskListString}
 
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     let aiText = data.candidates[0].content.parts[0].text;
-                    aiText = aiText.replace(/\*\*/g, ''); // 가독성을 방해하는 볼드 기호 제거
+                    aiText = aiText.replace(/\*\*/g, ''); 
                     aiResult.textContent = aiText.trim();
                     aiResult.classList.remove('hidden');
                 } else {
