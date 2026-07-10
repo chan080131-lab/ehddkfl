@@ -2,118 +2,76 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 수행평가 플래너 (PWA)</title>
+    <title>나의 수행평가 AI 플래너</title>
+    <!-- 복잡한 디자인 프레임워크 버전을 낮추고 직관적으로 세팅 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center p-4 sm:p-6">
+<body class="bg-gray-100 p-5">
 
-    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6 space-y-6">
-        <header class="flex justify-between items-center border-b pb-4 border-slate-100">
-            <div>
-                <h1 class="text-2xl font-bold text-indigo-600 flex items-center gap-2">
-                    <i class="fa-solid fa-graduation-cap"></i> AI 학업 플래너
-                </h1>
-                <p class="text-xs text-slate-400 mt-1">LocalStorage & Firebase 동기화 지원</p>
-            </div>
-            <div id="auth-section">
-                <button id="btn-login" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
-                    <i class="fa-solid fa-right-to-bracket mr-1"></i> 로그인
-                </button>
-                <div id="user-info" class="hidden flex items-center gap-3">
-                    <span id="user-name" class="text-sm font-semibold text-slate-600"></span>
-                    <button id="btn-logout" class="text-xs text-red-500 hover:underline cursor-pointer">로그아웃</button>
-                </div>
-            </div>
+    <!-- 메인 박스: 그림자와 둥근 모서리 기본형 -->
+    <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md space-y-6">
+        
+        <!-- 타이틀 부분 -->
+        <header class="border-b pb-3">
+            <h1 class="text-2xl font-bold text-blue-600">📅 나의 수행평가 AI 플래너</h1>
+            <p class="text-xs text-gray-500">인터넷 브라우저에 저장되는 간편 플래너</p>
         </header>
 
-        <section class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-plus-circle text-indigo-500"></i> 새 일정 / 수행평가 등록
-            </h2>
-            <form id="todo-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="sm:col-span-2">
-                    <input type="text" id="todo-title" placeholder="과제 또는 시험 이름을 입력하세요 (예: 수학 수행평가)" required
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-                </div>
+        <!-- 1. 일정 등록 양식 -->
+        <section class="bg-gray-50 p-4 rounded-lg border">
+            <h2 class="text-md font-bold mb-2">✏️ 새 일정 등록</h2>
+            <form id="todo-form" class="space-y-3">
                 <div>
-                    <label class="block text-xs text-slate-500 mb-1">마감일 선택</label>
-                    <input type="date" id="todo-date" required
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                    <input type="text" id="todo-title" placeholder="과제 이름 (예: 수학 문제풀이 제출)" required
+                        class="w-full p-2 border rounded bg-white text-sm">
                 </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium transition cursor-pointer">
-                        <i class="fa-solid fa-check mr-1"></i> 등록하기
+                <div class="flex gap-2">
+                    <input type="date" id="todo-date" required class="w-full p-2 border rounded bg-white text-sm">
+                    <button type="submit" class="w-32 bg-blue-500 text-white rounded text-sm font-bold hover:bg-blue-600">
+                        등록
                     </button>
                 </div>
             </form>
         </section>
 
+        <!-- 2. 일정 출력 목록 -->
         <section>
-            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-indigo-500"></i> 나의 일정 목록
-            </h2>
-            <ul id="todo-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                <li class="text-center py-6 text-slate-400 text-sm border border-dashed rounded-xl">등록된 일정이 없습니다.</li>
+            <h2 class="text-md font-bold mb-2">📋 현재 일정 목록</h2>
+            <ul id="todo-list" class="space-y-2">
+                <!-- 자바스크립트로 일정이 여기에 한 줄씩 추가됩니다 -->
             </ul>
         </section>
 
-        <section class="border-t pt-4 border-slate-100">
-            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-purple-600">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> AI 맞춤형 통합 계획 추천
-            </h2>
-            <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 space-y-3">
-                <p class="text-xs text-purple-700">
-                    💡 버튼을 누르면 구글 AI가 위에 등록된 **모든 일정**의 마감일을 분석해 최적의 우선순위와 일자별 분배 계획을 세워줍니다.
+        <!-- 3. AI 추천 기능 -->
+        <section class="border-t pt-4">
+            <h2 class="text-md font-bold text-purple-600 mb-2">✨ AI 통합 스케줄러 추천</h2>
+            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
+                <p class="text-xs text-purple-800">
+                    💡 버튼을 누르면 인공지능이 마감일을 계산하여 공부 우선순위 계획을 세워줍니다.
                 </p>
-                <div class="flex justify-center">
-                    <button id="btn-ai-recommend" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition cursor-pointer shadow-md">
-                        <i class="fa-solid fa-brain mr-1"></i> 나의 전체 일정을 토대로 추천받기
-                    </button>
+                <button id="btn-ai-recommend" class="w-full bg-purple-600 text-white py-2 rounded text-sm font-bold hover:bg-purple-700">
+                    AI에게 계획 추천받기
+                </button>
+                
+                <!-- 로딩 중 화면 -->
+                <div id="ai-loading" class="hidden text-center text-sm text-purple-600 font-bold">
+                    🤖 AI가 일정을 분석하여 답변을 작성하고 있습니다...
                 </div>
-                <div id="ai-loading" class="hidden text-center py-4 text-purple-600 text-sm font-medium animate-pulse">
-                    <i class="fa-solid fa-spinner animate-spin mr-2"></i> AI가 모든 일정을 취합하여 분석 중...
-                </div>
-                <div id="ai-result" class="hidden p-4 bg-white border border-purple-200 rounded-lg text-sm text-slate-700 whitespace-pre-line leading-relaxed shadow-inner max-h-[400px] overflow-y-auto"></div>
+                
+                <!-- 결과창 -->
+                <div id="ai-result" class="hidden p-3 bg-white border rounded text-sm text-gray-700 whitespace-pre-line leading-relaxed"></div>
             </div>
         </section>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        
-        // 보주신 진짜 키를 정상적으로 심어놓았습니다.
+        // 구글 제미나이 API 키 
         const GEMINI_API_KEY ="AQ.Ab8RN6KDxrfXDRSN6JKPUktDRyIfyQ0dopL6TNESXg2mvn-hCw"; 
 
+        // 일정을 담아둘 빈 리스트(배열) 생성
         let todos = [];
-        let isFirebaseConnected = false;
-        let currentUser = null;
-        let database = null;
 
-        try {
-            if (firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
-                firebase.initializeApp(firebaseConfig);
-                database = firebase.database();
-                isFirebaseConnected = true;
-                console.log("Firebase 연결 성공!");
-            }
-        } catch (error) {
-            console.error("Firebase 초기화 실패 (로컬 모드로 전환):", error);
-        }
-
+        // HTML 태그들을 자바스크립트 변수로 가져오기
         const todoForm = document.getElementById('todo-form');
         const todoTitle = document.getElementById('todo-title');
         const todoDate = document.getElementById('todo-date');
@@ -121,130 +79,117 @@
         const btnAiRecommend = document.getElementById('btn-ai-recommend');
         const aiLoading = document.getElementById('ai-loading');
         const aiResult = document.getElementById('ai-result');
-        const btnLogin = document.getElementById('btn-login');
-        const btnLogout = document.getElementById('btn-logout');
-        const userInfo = document.getElementById('user-info');
-        const userName = document.getElementById('user-name');
 
-        todoDate.min = new Date().toISOString().split("T")[0];
-
+        // [함수 1] 날짜를 받아서 디데이(D-Day)를 계산하는 함수
         function calculateDDay(targetDateStr) {
             const today = new Date();
-            today.setHours(0,0,0,0);
+            today.setHours(0,0,0,0); // 시, 분, 초 초기화
+            
             const target = new Date(targetDateStr);
             target.setHours(0,0,0,0);
             
             const diffTime = target - today;
+            // 밀리초 단위를 일(Day) 단위로 환산
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
-            if (diffDays === 0) return { text: "D-Day", class: "bg-red-500 text-white" };
-            if (diffDays < 0) return { text: `만료`, class: "bg-slate-400 text-white" };
-            if (diffDays <= 3) return { text: `D-${diffDays}`, class: "bg-orange-500 text-white font-bold animate-bounce" };
-            return { text: `D-${diffDays}`, class: "bg-indigo-100 text-indigo-700" };
+            if (diffDays === 0) {
+                return "D-Day";
+            } else if (diffDays < 0) {
+                return "만료";
+            } else {
+                return "D-" + diffDays;
+            }
         }
 
+        // [함수 2] 브라우저 저장소(LocalStorage)에서 데이터 가져오기
         function loadData() {
-            if (currentUser && isFirebaseConnected) {
-                database.ref('todos/' + currentUser.uid).on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    todos = data ? Object.keys(data).map(key => ({id: key, ...data[key]})) : [];
-                    render();
-                });
+            const localData = localStorage.getItem('my_todos');
+            if (localData) {
+                todos = JSON.parse(localData);
             } else {
-                const localData = localStorage.getItem('todos');
-                todos = localData ? JSON.parse(localData) : [];
-                render();
+                todos = [];
             }
+            render(); // 화면에 그려주기
         }
 
-        function saveData(newTodo) {
-            if (currentUser && isFirebaseConnected) {
-                const newRef = database.ref('todos/' + currentUser.uid).push();
-                newRef.set(newTodo);
-            } else {
-                todos.push({ id: Date.now().toString(), ...newTodo });
-                localStorage.setItem('todos', JSON.stringify(todos));
-                render();
-            }
-        }
-
-        function deleteData(id) {
-            if (currentUser && isFirebaseConnected) {
-                database.ref(`todos/${currentUser.uid}/${id}`).remove();
-            } else {
-                todos = todos.filter(todo => todo.id !== id);
-                localStorage.setItem('todos', JSON.stringify(todos));
-                render();
-            }
-        }
-
+        // [함수 3] 화면에 리스트를 그려주는 함수
         function render() {
-            todoList.innerHTML = '';
+            todoList.innerHTML = ''; // 기존 내용을 한 번 싹 비우기
 
             if (todos.length === 0) {
-                todoList.innerHTML = `<li class="text-center py-6 text-slate-400 text-sm border border-dashed rounded-xl">등록된 일정이 없습니다.</li>`;
+                todoList.innerHTML = '<li class="text-center py-4 text-gray-400 text-sm">등록된 일정이 없습니다.</li>';
                 return;
             }
 
-            todos.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            todos.forEach(todo => {
-                const dDayInfo = calculateDDay(todo.date);
+            // 고등학교 수준에서 가장 명확한 일반 for문 사용
+            for (let i = 0; i < todos.length; i++) {
+                const todo = todos[i];
+                const dDayText = calculateDDay(todo.date);
                 
+                // HTML 한 줄 생성
                 const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-slate-50 border p-3 rounded-xl transition hover:bg-slate-100 group";
+                li.className = "flex justify-between items-center bg-gray-50 border p-2 rounded text-sm";
                 li.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs px-2.5 py-1 rounded-full font-medium ${dDayInfo.class}">${dDayInfo.text}</span>
-                        <span class="font-medium text-slate-700">${todo.title}</span>
-                        <span class="text-xs text-slate-400">${todo.date}</span>
+                    <div>
+                        <span class="font-bold text-red-500 mr-2">[${dDayText}]</span>
+                        <span class="font-medium text-gray-800">${todo.title}</span>
+                        <span class="text-xs text-gray-400 ml-2">(${todo.date})</span>
                     </div>
-                    <button onclick="deleteData('${todo.id}')" class="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                        <i class="fa-solid fa-trash-can"></i>
+                    <button onclick="deleteData(${i})" class="text-xs text-red-400 hover:text-red-600 font-bold">
+                        삭제
                     </button>
                 `;
                 todoList.appendChild(li);
-            });
+            }
         }
 
-        todoForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+        // [함수 4] 새로운 일정을 추가하고 저장하는 함수
+        todoForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // 폼이 제출될 때 페이지가 새로고침되는 것을 방지
+            
             const newTodo = {
                 title: todoTitle.value,
                 date: todoDate.value
             };
-            saveData(newTodo);
-            todoForm.reset();
+            
+            todos.push(newTodo); // 배열에 넣기
+            localStorage.setItem('my_todos', JSON.stringify(todos)); // 저장소에 기록
+            
+            todoForm.reset(); // 입력창 비우기
+            render(); // 화면 갱신
         });
 
-        // ==========================================
-        // 전체 일정을 취합하여 AI에게 쏘는 주입부 (최신 gemini-2.5-flash 주소 반영)
-        // ==========================================
-        btnAiRecommend.addEventListener('click', async () => {
+        // [함수 5] 특정 일정을 삭제하는 함수 (인덱스 번호 이용)
+        window.deleteData = function(index) {
+            todos.splice(index, 1); // 배열에서 해당 순서의 데이터 1개 삭제
+            localStorage.setItem('my_todos', JSON.stringify(todos)); // 다시 저장
+            render(); // 화면 갱신
+        }
+
+        // [함수 6] AI 버튼을 클릭했을 때의 동작
+        btnAiRecommend.addEventListener('click', async function() {
             if (todos.length === 0) {
-                alert('먼저 상단에 수행평가나 학업 일정을 최소 1개 이상 등록해 주세요!');
+                alert('플래너에 일정을 먼저 등록해 주세요!');
                 return;
             }
 
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.startsWith("YOUR")) {
-                alert("구글 Gemini API 키를 정확히 입력해 주세요.");
-                return;
-            }
-
+            // 로딩창 켜고 결과창 숨기기
             aiLoading.classList.remove('hidden');
             aiResult.classList.add('hidden');
 
-            const taskListString = todos.map(t => {
-                const dDayInfo = calculateDDay(t.date);
-                return `- 과제명: ${t.title}, 마감일: ${t.date} (${dDayInfo.text})`;
-            }).join('\n');
+            // AI에게 보낼 텍스트 문장 만들기
+            let taskListString = "";
+            for (let i = 0; i < todos.length; i++) {
+                taskListString = taskListString + "- " + todos[i].title + " (마감일: " + todos[i].date + ")\n";
+            }
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            // 고등학생이 작성한 듯한 투박하지만 명확한 프롬프트(질문)
+            const promptText = "안녕하세요. 저는 고등학생입니다. 제가 가진 수행평가 일정들을 보고 언제 무엇부터 공부해야 할지 요일별로 계획을 대신 짜주세요.\n\n[내 일정 목록]\n" + taskListString;
 
             try {
-                // 주소를 최신 안정 버전인 gemini-2.5-flash로 업데이트했습니다.
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
                 
+                // 순수 자바스크립트 fetch API 통신
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
@@ -253,17 +198,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [{
-                                text: `당신은 학생들을 위한 전문 학업 코치입니다. 사용자가 플래너에 등록한 여러 개의 학업 일정(수행평가, 시험 등) 전체 목록을 분석하여, 마감기한이 급한 것부터 처리할 수 있도록 완벽한 통합 스케줄링을 작성해 주세요.
-
-기준 당일 날짜: ${todayStr}
-
-[제공된 나의 전체 일정 목록]
-${taskListString}
-
-[답변 요청 가이드라인]
-1. 위 일정들의 마감일을 비교하여 가장 먼저 집중해야 할 과제 '우선순위 리스트'를 명확히 짚어주세요.
-2. 여러 과제들이 겹치거나 밀리지 않도록 오늘부터 일자별로 구체적으로 무엇을 어느 분량만큼 진행해야 하는지 '요일별/일자별 통합 플랜'을 깔끔한 불릿포인트 형태로 짜주세요.
-3. 여러 개의 일정을 동시에 소화해야 하는 학생을 위해 짧고 강력한 응원의 한마디를 덧붙여 주세요.`
+                                text: promptText
                             }]
                         }]
                     })
@@ -271,60 +206,26 @@ ${taskListString}
 
                 const data = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.error.message || "구글 서버 API 오류");
-                }
+                // AI 답변 데이터 꺼내오기
+                let aiText = data.candidates[0].content.parts[0].text;
+                
+                // AI가 가끔 쓰는 글자 강조용 별표(**) 기호 제거하기
+                aiText = aiText.replace(/\*\*/g, ''); 
+                
+                // 화면에 출력
+                aiResult.textContent = aiText;
+                aiResult.classList.remove('hidden');
 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    let aiText = data.candidates[0].content.parts[0].text;
-                    aiText = aiText.replace(/\*\*/g, ''); 
-                    aiResult.textContent = aiText.trim();
-                    aiResult.classList.remove('hidden');
-                } else {
-                    throw new Error("Gemini 응답 형식이 올바르지 않습니다.");
-                }
             } catch (error) {
-                console.error(error);
-                alert("AI 추천 오류: " + error.message);
+                alert("AI 통신 중 오류가 발생했습니다.");
             } finally {
+                // 어떤 경우든 마지막엔 로딩 애니메이션 끄기
                 aiLoading.classList.add('hidden');
             }
         });
 
-        if (isFirebaseConnected) {
-            const provider = new firebase.auth.GoogleAuthProvider();
-
-            btnLogin.addEventListener('click', () => {
-                firebase.auth().signInWithPopup(provider).catch((err) => console.error(err));
-            });
-
-            btnLogout.addEventListener('click', () => {
-                firebase.auth().signOut();
-            });
-
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    currentUser = user;
-                    btnLogin.classList.add('hidden');
-                    userInfo.classList.remove('hidden');
-                    userName.textContent = user.displayName + " 님";
-                } else {
-                    currentUser = null;
-                    btnLogin.classList.remove('hidden');
-                    userInfo.classList.add('hidden');
-                    userName.textContent = "";
-                }
-                loadData();
-            });
-        } else {
-            loadData();
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW 등록 보류:', err));
-            });
-        }
+        // 웹페이지가 처음 켜질 때 데이터 불러오기
+        loadData();
     </script>
 </body>
 </html>
