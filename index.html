@@ -1,40 +1,117 @@
-Function addTodo() {
-    const titleInput = document.getElementById("title"); 
-    const dateInput = document.getElementById("date");   
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>나의 수행평가 AI 플래너</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 p-6">
 
-    if (titleInput.value == "" || dateInput.value == "") {
-        alert("내용을 입력해주세요!");
-        return;
-    }
+    <div class="max-w-md mx-auto bg-white p-5 rounded-lg shadow">
+        <h1 class="text-xl font-bold text-blue-600 mb-4">📅 나의 수행평가 AI 플래너</h1>
+        
+        <div class="bg-gray-50 p-3 rounded mb-4 border">
+            <input type="text" id="title" placeholder="과제 이름" class="w-full p-2 border rounded mb-2 bg-white text-sm">
+            <input type="date" id="date" class="w-full p-2 border rounded mb-2 bg-white text-sm">
+            <button onclick="addTodo()" class="w-full bg-blue-500 text-white py-1.5 rounded font-bold text-sm">일정 등록</button>
+        </div>
 
-    const newTodo = {
-        title: titleInput.value,
-        date: dateInput.value
-    };
+        <div class="mb-4">
+            <h2 class="font-bold text-sm mb-2">📋 등록된 일정</h2>
+            <ul id="todo-list" class="space-y-1 text-sm">
+                </ul>
+        </div>
 
-    todos.push(newTodo); 
-    showList();          
+        <div class="border-t pt-4 bg-purple-50 p-3 rounded border border-purple-200">
+            <button onclick="askAI()" class="w-full bg-purple-600 text-white py-2 rounded font-bold text-sm">AI에게 계획 추천받기</button>
+            <div id="loading" class="hidden text-center text-xs text-purple-600 font-bold my-2"> AI 분석 중...</div>
+            <div id="result" class="hidden p-2 bg-white border rounded text-xs mt-2 whitespace-pre-line text-gray-600"></div>
+        </div>
+    </div>
 
-    titleInput.value = "";
-    dateInput.value = "";  
-}
-function addTodo() {
-    const titleInput = document.getElementById("title"); 
-    const dateInput = document.getElementById("date");   
+    <script>
+        const API_KEY ="AQ.Ab8RN6KDxrfXDRSN6JKPUktDRyIfyQ0dopL6TNESXg2mvn-hCw";
 
-    if (titleInput.value == "" || dateInput.value == "") {
-        alert("내용을 입력해주세요!");
-        return;
-    }
+        let todos = [];
 
-    const newTodo = {
-        title: titleInput.value,
-        date: dateInput.value
-    };
+        function showList() {
+            const listTag = document.getElementById("todo-list");
+            listTag.innerHTML = ""; 
 
-    todos.push(newTodo); 
-    showList();         
+            for (let i = 0; i < todos.length; i++) {
+            
+                const item = todos[i]; 
+                
+                listTag.innerHTML += "<li class='bg-gray-50 p-2 border rounded flex justify-between'><span>" + item.title + " (" + item.date + ")</span><button onclick='deleteTodo(" + i + ")' class='text-red-500 font-bold'>X</button></li>";
+            }
+        }
 
-    titleInput.value = ""; 
-    dateInput.value = "";  
-}
+        function addTodo() {
+            const titleInput = document.getElementById("title");
+            const dateInput = document.getElementById("date");
+
+            if (titleInput.value == "" || dateInput.value == "") {
+                alert("내용을 입력해주세요!");
+                return;
+            }
+
+            const newTodo = {
+                title: titleInput.value,
+                date: dateInput.value
+            };
+
+            todos.push(newTodo); 
+            showList(); 
+
+            // 입력창 비워주기
+            titleInput.value = "";
+            dateInput.value = "";
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1); 
+            showList();
+        }
+
+        function askAI() {
+            if (todos.length == 0) {
+                alert("일정을 먼저 등록하세요!");
+                return;
+            }
+
+            document.getElementById("loading").classList.remove("hidden");
+            document.getElementById("result").classList.add("hidden");
+
+            let questions = "고등학생 플래너입니다. 다음 일정들의 우선순위를 짜주세요:\n";
+            for (let i = 0; i < todos.length; i++) {
+                questions += "- " + todos[i].title + " (마감: " + todos[i].date + ")\n";
+            }
+
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: questions }] }]
+                })
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                let aiResponse = data.candidates[0].content.parts[0].text;
+                aiResponse = aiResponse.replace(/\*\*/g, "");
+            
+                document.getElementById("result").textContent = aiResponse;
+                document.getElementById("result").classList.remove("hidden");
+                document.getElementById("loading").classList.add("hidden");
+            })
+            .catch(function(error) {
+                alert("오류가 발생했습니다.");
+                document.getElementById("loading").classList.add("hidden");
+            });
+        }
+    </script>
+</body>
+</html>
