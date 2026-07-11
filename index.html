@@ -1,231 +1,40 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>나의 수행평가 AI 플래너</title>
-    <!-- 복잡한 디자인 프레임워크 버전을 낮추고 직관적으로 세팅 -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-</head>
-<body class="bg-gray-100 p-5">
+Function addTodo() {
+    const titleInput = document.getElementById("title"); 
+    const dateInput = document.getElementById("date");   
 
-    <!-- 메인 박스: 그림자와 둥근 모서리 기본형 -->
-    <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md space-y-6">
-        
-        <!-- 타이틀 부분 -->
-        <header class="border-b pb-3">
-            <h1 class="text-2xl font-bold text-blue-600">📅 나의 수행평가 AI 플래너</h1>
-            <p class="text-xs text-gray-500">인터넷 브라우저에 저장되는 간편 플래너</p>
-        </header>
+    if (titleInput.value == "" || dateInput.value == "") {
+        alert("내용을 입력해주세요!");
+        return;
+    }
 
-        <!-- 1. 일정 등록 양식 -->
-        <section class="bg-gray-50 p-4 rounded-lg border">
-            <h2 class="text-md font-bold mb-2">✏️ 새 일정 등록</h2>
-            <form id="todo-form" class="space-y-3">
-                <div>
-                    <input type="text" id="todo-title" placeholder="과제 이름 (예: 수학 문제풀이 제출)" required
-                        class="w-full p-2 border rounded bg-white text-sm">
-                </div>
-                <div class="flex gap-2">
-                    <input type="date" id="todo-date" required class="w-full p-2 border rounded bg-white text-sm">
-                    <button type="submit" class="w-32 bg-blue-500 text-white rounded text-sm font-bold hover:bg-blue-600">
-                        등록
-                    </button>
-                </div>
-            </form>
-        </section>
+    const newTodo = {
+        title: titleInput.value,
+        date: dateInput.value
+    };
 
-        <!-- 2. 일정 출력 목록 -->
-        <section>
-            <h2 class="text-md font-bold mb-2">📋 현재 일정 목록</h2>
-            <ul id="todo-list" class="space-y-2">
-                <!-- 자바스크립트로 일정이 여기에 한 줄씩 추가됩니다 -->
-            </ul>
-        </section>
+    todos.push(newTodo); 
+    showList();          
 
-        <!-- 3. AI 추천 기능 -->
-        <section class="border-t pt-4">
-            <h2 class="text-md font-bold text-purple-600 mb-2">✨ AI 통합 스케줄러 추천</h2>
-            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200 space-y-3">
-                <p class="text-xs text-purple-800">
-                    💡 버튼을 누르면 인공지능이 마감일을 계산하여 공부 우선순위 계획을 세워줍니다.
-                </p>
-                <button id="btn-ai-recommend" class="w-full bg-purple-600 text-white py-2 rounded text-sm font-bold hover:bg-purple-700">
-                    AI에게 계획 추천받기
-                </button>
-                
-                <!-- 로딩 중 화면 -->
-                <div id="ai-loading" class="hidden text-center text-sm text-purple-600 font-bold">
-                    🤖 AI가 일정을 분석하여 답변을 작성하고 있습니다...
-                </div>
-                
-                <!-- 결과창 -->
-                <div id="ai-result" class="hidden p-3 bg-white border rounded text-sm text-gray-700 whitespace-pre-line leading-relaxed"></div>
-            </div>
-        </section>
-    </div>
+    titleInput.value = "";
+    dateInput.value = "";  
+}
+function addTodo() {
+    const titleInput = document.getElementById("title"); 
+    const dateInput = document.getElementById("date");   
 
-    <script>
-        // 구글 제미나이 API 키 
-        const GEMINI_API_KEY ="AQ.Ab8RN6KDxrfXDRSN6JKPUktDRyIfyQ0dopL6TNESXg2mvn-hCw"; 
+    if (titleInput.value == "" || dateInput.value == "") {
+        alert("내용을 입력해주세요!");
+        return;
+    }
 
-        // 일정을 담아둘 빈 리스트(배열) 생성
-        let todos = [];
+    const newTodo = {
+        title: titleInput.value,
+        date: dateInput.value
+    };
 
-        // HTML 태그들을 자바스크립트 변수로 가져오기
-        const todoForm = document.getElementById('todo-form');
-        const todoTitle = document.getElementById('todo-title');
-        const todoDate = document.getElementById('todo-date');
-        const todoList = document.getElementById('todo-list');
-        const btnAiRecommend = document.getElementById('btn-ai-recommend');
-        const aiLoading = document.getElementById('ai-loading');
-        const aiResult = document.getElementById('ai-result');
+    todos.push(newTodo); 
+    showList();         
 
-        // [함수 1] 날짜를 받아서 디데이(D-Day)를 계산하는 함수
-        function calculateDDay(targetDateStr) {
-            const today = new Date();
-            today.setHours(0,0,0,0); // 시, 분, 초 초기화
-            
-            const target = new Date(targetDateStr);
-            target.setHours(0,0,0,0);
-            
-            const diffTime = target - today;
-            // 밀리초 단위를 일(Day) 단위로 환산
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 0) {
-                return "D-Day";
-            } else if (diffDays < 0) {
-                return "만료";
-            } else {
-                return "D-" + diffDays;
-            }
-        }
-
-        // [함수 2] 브라우저 저장소(LocalStorage)에서 데이터 가져오기
-        function loadData() {
-            const localData = localStorage.getItem('my_todos');
-            if (localData) {
-                todos = JSON.parse(localData);
-            } else {
-                todos = [];
-            }
-            render(); // 화면에 그려주기
-        }
-
-        // [함수 3] 화면에 리스트를 그려주는 함수
-        function render() {
-            todoList.innerHTML = ''; // 기존 내용을 한 번 싹 비우기
-
-            if (todos.length === 0) {
-                todoList.innerHTML = '<li class="text-center py-4 text-gray-400 text-sm">등록된 일정이 없습니다.</li>';
-                return;
-            }
-
-            // 고등학교 수준에서 가장 명확한 일반 for문 사용
-            for (let i = 0; i < todos.length; i++) {
-                const todo = todos[i];
-                const dDayText = calculateDDay(todo.date);
-                
-                // HTML 한 줄 생성
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-gray-50 border p-2 rounded text-sm";
-                li.innerHTML = `
-                    <div>
-                        <span class="font-bold text-red-500 mr-2">[${dDayText}]</span>
-                        <span class="font-medium text-gray-800">${todo.title}</span>
-                        <span class="text-xs text-gray-400 ml-2">(${todo.date})</span>
-                    </div>
-                    <button onclick="deleteData(${i})" class="text-xs text-red-400 hover:text-red-600 font-bold">
-                        삭제
-                    </button>
-                `;
-                todoList.appendChild(li);
-            }
-        }
-
-        // [함수 4] 새로운 일정을 추가하고 저장하는 함수
-        todoForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // 폼이 제출될 때 페이지가 새로고침되는 것을 방지
-            
-            const newTodo = {
-                title: todoTitle.value,
-                date: todoDate.value
-            };
-            
-            todos.push(newTodo); // 배열에 넣기
-            localStorage.setItem('my_todos', JSON.stringify(todos)); // 저장소에 기록
-            
-            todoForm.reset(); // 입력창 비우기
-            render(); // 화면 갱신
-        });
-
-        // [함수 5] 특정 일정을 삭제하는 함수 (인덱스 번호 이용)
-        window.deleteData = function(index) {
-            todos.splice(index, 1); // 배열에서 해당 순서의 데이터 1개 삭제
-            localStorage.setItem('my_todos', JSON.stringify(todos)); // 다시 저장
-            render(); // 화면 갱신
-        }
-
-        // [함수 6] AI 버튼을 클릭했을 때의 동작
-        btnAiRecommend.addEventListener('click', async function() {
-            if (todos.length === 0) {
-                alert('플래너에 일정을 먼저 등록해 주세요!');
-                return;
-            }
-
-            // 로딩창 켜고 결과창 숨기기
-            aiLoading.classList.remove('hidden');
-            aiResult.classList.add('hidden');
-
-            // AI에게 보낼 텍스트 문장 만들기
-            let taskListString = "";
-            for (let i = 0; i < todos.length; i++) {
-                taskListString = taskListString + "- " + todos[i].title + " (마감일: " + todos[i].date + ")\n";
-            }
-
-            // 고등학생이 작성한 듯한 투박하지만 명확한 프롬프트(질문)
-            const promptText = "안녕하세요. 저는 고등학생입니다. 제가 가진 수행평가 일정들을 보고 언제 무엇부터 공부해야 할지 요일별로 계획을 대신 짜주세요.\n\n[내 일정 목록]\n" + taskListString;
-
-            try {
-                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
-                
-                // 순수 자바스크립트 fetch API 통신
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: promptText
-                            }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                
-                // AI 답변 데이터 꺼내오기
-                let aiText = data.candidates[0].content.parts[0].text;
-                
-                // AI가 가끔 쓰는 글자 강조용 별표(**) 기호 제거하기
-                aiText = aiText.replace(/\*\*/g, ''); 
-                
-                // 화면에 출력
-                aiResult.textContent = aiText;
-                aiResult.classList.remove('hidden');
-
-            } catch (error) {
-                alert("AI 통신 중 오류가 발생했습니다.");
-            } finally {
-                // 어떤 경우든 마지막엔 로딩 애니메이션 끄기
-                aiLoading.classList.add('hidden');
-            }
-        });
-
-        // 웹페이지가 처음 켜질 때 데이터 불러오기
-        loadData();
-    </script>
-</body>
-</html>
+    titleInput.value = ""; 
+    dateInput.value = "";  
+}
